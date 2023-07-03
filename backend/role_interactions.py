@@ -7,6 +7,7 @@ from psycopg2 import errors
 
 import postgres_defaults as pod
 
+
 @dataclass
 class RoleInteractions:
     db_name: str = pod.db_name
@@ -16,12 +17,16 @@ class RoleInteractions:
     db_port: str = pod.db_port
 
     def __post_init__(self):
-        time.sleep(5)
-        self.connection = pg.connect(database=self.db_name,
-                                     user=self.db_user,
-                                     password=self.db_pass,
-                                     host=self.db_host,
-                                     port=self.db_port)
+        while True:
+            try:
+                self.connection = pg.connect(database=self.db_name,
+                                             user=self.db_user,
+                                             password=self.db_pass,
+                                             host=self.db_host,
+                                             port=self.db_port)
+                break
+            except:
+                time.sleep(1)
 
     def create_new_role(self, role_name):
         try:
