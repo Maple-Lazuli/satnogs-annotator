@@ -26,6 +26,7 @@ class RoleInteractions:
                                              port=self.db_port)
                 break
             except:
+                print("Could not connect... Trying again in one sec")
                 time.sleep(1)
 
     def create_new_role(self, role_name):

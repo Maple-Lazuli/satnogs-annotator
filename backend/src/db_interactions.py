@@ -8,43 +8,6 @@ import time
 from datetime import datetime, timedelta
 import hashlib
 
-
-def generate_code():
-    hasher = hashlib.sha512()
-    hasher.update(f"{datetime.now()} {random.randint(1, 100000)}".encode())
-    return hasher.hexdigest()
-
-
-    def get_session(self, code, account_id):
-        fetched_session = None
-        try:
-            with self.connection, self.connection.cursor() as cur:
-                cur.execute(f"select * from sessions where session_code = %(code)s and account_id = %(account_id)s;",
-                            {'code': code, 'account_id': account_id})
-
-                fetched_session = cur.fetchone()
-            return Session(*fetched_session) if fetched_session is not None else None
-
-        except Exception as e:
-            print(e)
-            return fetched_session
-
-    def add_session(self, account_id):
-        # create code
-        code = generate_code()
-        try:
-            with self.connection, self.connection.cursor() as cur:
-                cur.execute(f"""INSERT INTO sessions (account_id, creation_date, end_date, session_code) VALUES
-                 (%(account_id)s,%(creation_date)s,%(end_date)s,%(session_code)s);""",
-                            {'account_id': account_id, 'creation_date': datetime.now(),
-                             'end_date': datetime.now() + timedelta(hours=10),
-                             'session_code': code})
-            return code
-
-        except Exception as e:
-            print(e)
-            return None
-
     def add_item(self, account_id, name, description, quantity):
         try:
             with self.connection, self.connection.cursor() as cur:
@@ -113,22 +76,6 @@ def generate_code():
         except Exception as e:
             print(e)
             return False
-
-@dataclass
-class PermissionChange:
-    change_id: int
-    account_id: int
-    role_id: int
-    change_date: datetime
-
-
-@dataclass
-class Session:
-    session_id: int
-    account_id: int
-    creation_date: datetime
-    end_date: datetime
-    session_code: str
 
 
 @dataclass
