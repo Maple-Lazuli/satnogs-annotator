@@ -31,7 +31,6 @@ class DBInteractions:
                                      host=self.db_host,
                                      port=self.db_port)
 
-
     def create_new_role(self, role_name):
         try:
             with self.connection, self.connection.cursor() as cur:
@@ -377,14 +376,36 @@ class Session:
 
 
 @dataclass
-class Item:
-    item_id: int
-    account_id: int
-    name: str
-    description: str
-    quantity: int
+class Annotation:
+    annotation_id: int
+    observation_id: int
+    annotations: str
     creation_date: datetime
     modification_date: datetime
+
+
+@dataclass
+class Observation:
+    observation_id: int
+    satnogs_id: int
+    satellite_name: str
+    station_name: str
+    status_str: str
+    status_code: int
+    transmitter: str
+    frequency: int
+    pull_date: datetime
+    original_waterfall: bytes
+    greyscale_waterfall: bytes
+    threshold_waterfall: bytes
+
+
+@dataclass
+class Task:
+    observation_id: int
+    status: str
+    start: datetime
+    completion_date: datetime
 
 
 if __name__ == "__main__":
@@ -447,15 +468,4 @@ if __name__ == "__main__":
     # items
     print(f"{'*' * 100}")
     print("ITEMS")
-    print(interactor.get_items())
-    print(interactor.add_item(account.account_id, "Item1", "This is a test item", 5))
-    print(interactor.add_item(account.account_id, "Item2", "This is a test item 2", 15))
-    print(interactor.add_item(account.account_id, "Item3", "This is a test item 3", 115))
-    print(interactor.get_items())
-    item_id = interactor.get_items()[0].item_id
-    print(interactor.get_item(item_id=item_id))
-    print(interactor.delete_item(item_id=item_id))
-    print(interactor.get_items())
-    item_id = interactor.get_items()[0].item_id
-    print(interactor.get_item(item_id=item_id))
-    print(interactor.update_item(item_id=item_id, name="updated item", description="updated description", quantity=12))
+

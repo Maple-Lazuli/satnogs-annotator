@@ -1,0 +1,5 @@
+db_name = 'inventory_db'
+db_user = 'postgres'
+db_pass = 'postgres'
+db_host = 'postgres'
+db_port = '5432'
