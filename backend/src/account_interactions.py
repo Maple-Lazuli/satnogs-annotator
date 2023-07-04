@@ -157,8 +157,8 @@ class Account:
     locked: bool
     log_in_attempts: int
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     role_interactor = ri.RoleInteractions()
 
     account_interactor = AccountInteractions()

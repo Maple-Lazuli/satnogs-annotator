@@ -4,6 +4,7 @@ import requests
 import satnogs_webscraper as sw
 import numpy as np
 
+
 def fetch_satnogs(satnogs_id):
     os = sw.observation_scraper.ObservationScraper()
     results = os.scrape_observation(f"https://network.satnogs.org/observations/{satnogs_id}/")

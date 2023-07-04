@@ -5,3 +5,4 @@ python -m account_interactions
 python -m permission_interactions
 python -m session_interactions
 python -m observation_interactions
+python -m task_interactions

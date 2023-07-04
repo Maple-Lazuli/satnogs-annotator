@@ -15,7 +15,6 @@ import hashlib
                  VALUES (%(account_id)s,%(name)s,%(description)s,%(quantity)s,%(creation_date)s);""",
                             {'account_id': account_id, 'name': name, 'description': description, 'quantity': quantity,
                              'creation_date': datetime.now()})
-
             return True
 
         except Exception as e:
@@ -81,26 +80,11 @@ import hashlib
 @dataclass
 class Annotation:
     annotation_id: int
+    account_id:int
     observation_id: int
     annotations: str
     creation_date: datetime
     modification_date: datetime
-
-
-@dataclass
-class Observation:
-    observation_id: int
-    satnogs_id: int
-    satellite_name: str
-    station_name: str
-    status_str: str
-    status_code: int
-    transmitter: str
-    frequency: int
-    pull_date: datetime
-    original_waterfall: bytes
-    greyscale_waterfall: bytes
-    threshold_waterfall: bytes
 
 
 @dataclass
