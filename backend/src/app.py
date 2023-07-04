@@ -18,13 +18,13 @@ from task_interactions import TaskInteractor
 app = Flask(__name__)
 CORS(app)
 
-account_actor
-annotation_actor
-observation_actor
-permission_actor
-role_actor
-session_actor
-task_actor
+account_actor = AccountInteractions()
+annotation_actor = AnnotationInteractor()
+observation_actor =  ObservationInteractor()
+permission_actor =  PermissionInteractor()
+role_actor = RoleInteractor()
+session_actor = SessionInteractor()
+task_actor = TaskInteractor()
 
 from enum import Enum
 
@@ -81,14 +81,14 @@ def sanitize_account(account):
 def get_account():
     args = request.args
     username = args['username']
-    account = interactor.get_account_by_username(username)
+    account = account_actor.get_account_by_username(username)
     account = sanitize_account(account)
     return Response(json.dumps(account, cls=JSONEncoder), status=200, mimetype='application/json')
 
 
 @app.route('/accounts', methods=['GET'])
 def get_accounts():
-    accounts = interactor.get_accounts()
+    accounts = account_actor.get_accounts()
     accounts = [sanitize_account(a) for a in accounts]
     return Response(json.dumps(accounts, cls=JSONEncoder), status=200, mimetype='application/json')
 
@@ -105,15 +105,15 @@ def create_account():
 
     password = create_hash(password_not_hashed, salt)
 
-    role = interactor.get_role_by_name(role_name)
+    role = role_actor.get_role_by_name(role_name)
 
     if role is None:
-        interactor.create_new_role(role_name=role_name)
+        role_actor.create_new_role(role_name=role_name)
         print("Created Role")
 
-    role = interactor.get_role_by_name(role_name)
+    role = role_actor.get_role_by_name(role_name)
 
-    status = interactor.create_account(role_id=role.role_id, first_name=first_name, last_name=last_name,
+    status = account_actor.create_account(role_id=role.role_id, first_name=first_name, last_name=last_name,
                                        user_name=username, password=password, salt=salt)
 
     return Response(json.dumps({'created': status}), status=200, mimetype='application/json')
@@ -129,13 +129,13 @@ def update_account():
     session_code = request.headers.get('Authorization').split(" ")[1]
     current_user = request.headers.get('Authorization').split(" ")[0]
 
-    current_user_account = interactor.get_account_by_username(current_user)
+    current_user_account = account_actor.get_account_by_username(current_user)
 
-    session = interactor.get_session(session_code, current_user_account.account_id)
+    session = session_actor.get_session(session_code, current_user_account.account_id)
 
     if valid_session(session):
         new_password = create_hash(clear_text=password_not_hashed, salt=current_user_account.salt)
-        interactor.update_account(account_id=current_user_account.account_id, first_name=first_name,
+        account_actor.update_account(account_id=current_user_account.account_id, first_name=first_name,
                                   last_name=last_name, user_name=username, password=new_password)
 
         return Response(json.dumps({"status": Status.SUCCESS}), status=200, mimetype='application/json')
@@ -154,14 +154,14 @@ def login():
     username = request.json['username']
     password_not_hashed = request.json['password']
 
-    account = interactor.get_account_by_username(username)
+    account = account_actor.get_account_by_username(username)
 
     if account is None:
         return Response(json.dumps({"code": "", "status": Status.AUTHENTICATION_FAILURE}), status=200,
                         mimetype='application/json')
 
     if account.log_in_attempts >= 15:
-        interactor.set_account_lock(account_id=account.account_id, locked=True)
+        account_actor.set_account_lock(account_id=account.account_id, locked=True)
         return Response(json.dumps({"code": "", "status": Status.ACCOUNT_LOCKED}), status=200,
                         mimetype='application/json')
 
@@ -170,102 +170,102 @@ def login():
                         mimetype='text')
 
     if verify_hash(clear_text=password_not_hashed, salt=account.salt, stored_hash=account.password):
-        code = interactor.add_session(account_id=account.account_id)
-        interactor.reset_log_in_attempt(account_id=account.account_id)
+        code = session_actor.add_session(account_id=account.account_id)
+        account_actor.reset_log_in_attempt(account_id=account.account_id)
         return Response(json.dumps({"code": code, "status": Status.SUCCESS, 'account_id': account.account_id}),
                         status=200, mimetype='text')
     else:
-        interactor.increment_log_in_attempt(account_id=account.account_id)
+        account_actor.increment_log_in_attempt(account_id=account.account_id)
         return Response(json.dumps({"code": "", "status": Status.AUTHENTICATION_FAILURE}), status=200,
                         mimetype='application/json')
 
 
-@app.route('/items', methods=['GET'])
-def get_items():
-    items = interactor.get_items()
+@app.route('/annotations', methods=['GET'])
+def get_annotations():
+    items = annotation_actor.get_annotations()
     return Response(json.dumps(items, cls=JSONEncoder), status=200, mimetype='application/json')
 
 
-@app.route('/itemsMapped', methods=['GET'])
-def get_items_mapped():
-    items = interactor.get_items()
-    accounts = interactor.get_accounts()
+@app.route('/annotationsMapped', methods=['GET'])
+def get_annotations_mapped():
+    annotations = annotation_actor.get_annotations()
+    accounts = account_actor.get_accounts()
 
-    for idx in range(len(items)):
-        item = items[idx]
-        item.account_id = [a.user_name for a in accounts if a.account_id == item.account_id][0]
-        items[idx] = item
+    for idx in range(len(annotations)):
+        annotation = annotations[idx]
+        # convert the username from the account id
+        annotation.account_id = [a.user_name for a in accounts if a.account_id == annotation.account_id][0]
+        annotations[idx] = annotation
 
-    return Response(json.dumps(items, cls=JSONEncoder), status=200, mimetype='application/json')
+    return Response(json.dumps(annotations, cls=JSONEncoder), status=200, mimetype='application/json')
 
 
-@app.route('/item', methods=['GET'])
+@app.route('/annotation', methods=['GET'])
 def get_item():
     args = request.args
-    item_id = args['item_id']
-    item = interactor.get_item(item_id=item_id)
-    return Response(json.dumps(item, cls=JSONEncoder), status=200, mimetype='application/json')
+    annotation_id = args['annotation_id']
+    annotation = annotation_actor.get_annotation(annotation_id=annotation_id)
+    return Response(json.dumps(annotation, cls=JSONEncoder), status=200, mimetype='application/json')
 
 
-@app.route('/item', methods=['POST'])
+@app.route('/annotation', methods=['POST'])
 def create_item():
-    name = request.json['name']
-    description = request.json['description']
-    quantity = request.json['quantity']
+    observation_id = request.json['observation_id']
+    upper_left = request.json['upper_left']
+    lower_right = request.json['lower_right']
     session_code = request.headers.get('Authorization').split(" ")[1]
     current_user = request.headers.get('Authorization').split(" ")[0]
 
-    current_user_account = interactor.get_account_by_username(current_user)
-    session = interactor.get_session(session_code, current_user_account.account_id)
+    current_user_account = account_actor.get_account_by_username(current_user)
+    session = session_actor.get_session(session_code, current_user_account.account_id)
 
     if valid_session(session):
-        interactor.add_item(account_id=current_user_account.account_id, name=name,
-                            description=description, quantity=quantity)
+        annotation_actor.add_annotation(account_id=current_user_account.account_id, observation_id=observation_id,
+                            upper_left=upper_left, lower_right=lower_right)
         return Response(json.dumps({"status": Status.SUCCESS}), status=200, mimetype='application/json')
     else:
         return Response(json.dumps({"status": Status.PERMISSION_DENIED}), status=200, mimetype='application/json')
 
 
-@app.route('/item', methods=['PUT'])
+@app.route('/annotation', methods=['PUT'])
 def update_item():
-    item_id = request.json['item_id']
-    name = request.json['name']
-    description = request.json['description']
-    quantity = request.json['quantity']
+    annotation_id = request.json['annotation_id']
+    upper_left = request.json['upper_left']
+    lower_right = request.json['lower_right']
 
     session_code = request.headers.get('Authorization').split(" ")[1]
     current_user = request.headers.get('Authorization').split(" ")[0]
 
-    current_user_account = interactor.get_account_by_username(current_user)
-    session = interactor.get_session(session_code, current_user_account.account_id)
+    current_user_account = account_actor.get_account_by_username(current_user)
+    session = session_actor.get_session(session_code, current_user_account.account_id)
 
-    item = interactor.get_item(item_id=item_id)
-    if item.account_id != current_user_account.account_id:
+    annotation = annotation_actor.get_annotation(annotation_id=annotation_id)
+    if annotation.account_id != current_user_account.account_id:
         return Response(json.dumps({"status": Status.PERMISSION_DENIED}), status=200, mimetype='application/json')
 
     if valid_session(session):
-        interactor.update_item(item_id=item_id, name=name, description=description, quantity=quantity)
+        annotation_actor.update_annotation(annotation_id=annotation_id, upper_left=upper_left, lower_right=lower_right)
         return Response(json.dumps({"status": Status.SUCCESS}), status=200, mimetype='application/json')
     else:
         return Response(json.dumps({"status": Status.PERMISSION_DENIED}), status=200, mimetype='application/json')
 
 
-@app.route('/item', methods=['DELETE'])
+@app.route('/annotation', methods=['DELETE'])
 def delete_item():
-    item_id = request.args['item_id']
+    annotation_id = request.json['annotation_id']
     session_code = request.headers.get('Authorization').split(" ")[1]
     current_user = request.headers.get('Authorization').split(" ")[0]
 
-    current_user_account = interactor.get_account_by_username(current_user)
-    session = interactor.get_session(session_code, current_user_account.account_id)
+    current_user_account = account_actor.get_account_by_username(current_user)
+    session = session_actor.get_session(session_code, current_user_account.account_id)
 
-    item = interactor.get_item(item_id=item_id)
+    annotation = annotation_actor.get_annotation(annotation_id=annotation_id)
 
-    if item.account_id != current_user_account.account_id:
+    if annotation.account_id != current_user_account.account_id:
         return Response(json.dumps({"status": Status.PERMISSION_DENIED}), status=200, mimetype='application/json')
 
     if valid_session(session):
-        interactor.delete_item(item_id=item_id)
+        annotation_actor.delete_annotation(annotation_id=annotation_id)
         return Response(json.dumps({"status": Status.SUCCESS}), status=200, mimetype='application/json')
     else:
         return Response(json.dumps({"status": Status.AUTHENTICATION_FAILURE}), status=200, mimetype='application/json')
