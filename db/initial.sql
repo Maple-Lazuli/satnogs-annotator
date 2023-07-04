@@ -54,7 +54,9 @@ CREATE TABLE observations (
 	pull_date TIMESTAMP NOT NULL,
 	original_waterfall BYTEA NOT NULL,
 	greyscaled_waterfall BYTEA NOT NULL,
-	thresholded_waterfall BYTEA NOT NULL
+	thresholded_waterfall BYTEA NOT NULL,
+	waterfall_length INT NOT NULL,
+	waterfall_width INT NOT NULL
 );
 
 CREATE TABLE annotations (
