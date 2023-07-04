@@ -7,7 +7,7 @@ import postgres_defaults as pod
 import account_interactions as ai
 
 @dataclass
-class SessionInteractions:
+class SessionInteractor:
     db_name: str = pod.db_name
     db_user: str = pod.db_user
     db_pass: str = pod.db_pass
@@ -63,7 +63,7 @@ class Session:
 
 if __name__ == "__main__":
     account_interactor = ai.AccountInteractions()
-    session_interactor = SessionInteractions()
+    session_interactor = SessionInteractor()
 
     account_id = account_interactor.get_account_by_username(user_name='adalazi').account_id
 

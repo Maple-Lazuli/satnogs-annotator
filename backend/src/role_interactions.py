@@ -9,7 +9,7 @@ import postgres_defaults as pod
 
 
 @dataclass
-class RoleInteractions:
+class RoleInteractor:
     db_name: str = pod.db_name
     db_user: str = pod.db_user
     db_pass: str = pod.db_pass
@@ -89,7 +89,7 @@ class Role:
 
 
 if __name__ == "__main__":
-    role_interactor = RoleInteractions()
+    role_interactor = RoleInteractor()
     print(role_interactor.get_roles())
     print(role_interactor.create_new_role("Administrator"))
     print(role_interactor.create_new_role("Manager"))

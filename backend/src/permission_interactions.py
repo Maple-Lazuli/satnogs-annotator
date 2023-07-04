@@ -9,7 +9,7 @@ import role_interactions as ri
 
 
 @dataclass
-class PermissionInteractions:
+class PermissionInteractor:
     db_name: str = pod.db_name
     db_user: str = pod.db_user
     db_pass: str = pod.db_pass
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     account_interactor = ai.AccountInteractions()
     role_interactor = ri.RoleInteractions()
-    permission_interactor = PermissionInteractions()
+    permission_interactor = PermissionInteractor()
 
     role_id = role_interactor.get_roles()[1].role_id
     account_id = account_interactor.get_account_by_username(user_name="adalazi").account_id

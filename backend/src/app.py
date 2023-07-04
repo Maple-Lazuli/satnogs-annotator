@@ -6,11 +6,25 @@ from flask_cors import CORS
 import random
 import hashlib
 
-from db_interactions import DBInteractions
+from account_interactions import AccountInteractions
+from annotation_interactions import AnnotationInteractor
+from observation_interactions import ObservationInteractor
+from permission_interactions import PermissionInteractor
+from role_interactions import RoleInteractor
+from session_interactions import SessionInteractor
+from task_interactions import TaskInteractor
+
 
 app = Flask(__name__)
 CORS(app)
-interactor = DBInteractions()
+
+account_actor
+annotation_actor
+observation_actor
+permission_actor
+role_actor
+session_actor
+task_actor
 
 from enum import Enum
 
