@@ -3,3 +3,4 @@ backend/.idea/*
 backend/test_notebooks/*
 frontend/Inventory/node_modules/*
 backend/src/__pycache__/*
+backend/src/satnogs-data/*

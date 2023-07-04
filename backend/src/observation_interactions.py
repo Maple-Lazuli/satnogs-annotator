@@ -4,7 +4,7 @@ from datetime import datetime
 import psycopg2 as pg
 
 import postgres_defaults as pod
-
+import satnogs_interactions as si
 
 @dataclass
 class ObservationInteractor:
@@ -26,10 +26,10 @@ class ObservationInteractor:
         try:
             with self.connection, self.connection.cursor() as cur:
                 cur.execute(f"""INSERT INTO observations (satnogs_id, satellite_name, station_name, status, status_code,
-                transmitter, frequency, pull_date, original_waterfall, greyscaled_waterfall, thresholded_waterfall)
-                values (%(satnogs_id)s, %(satellite_name)s, %(station_name)s, %(status)s, %(status_code)s,
-                 %(transmitter)s, %(frequency)s, %(pull_date)s, %(original_waterfall)s, %(greyscaled_waterfall)s,
-                  %(thresholded_waterfall)s, %(waterfall_length)s, %(waterfall_width)s);""",
+                transmitter, frequency, pull_date, original_waterfall, greyscaled_waterfall, thresholded_waterfall, 
+                waterfall_length, waterfall_width) values (%(satnogs_id)s, %(satellite_name)s, %(station_name)s,
+                 %(status)s, %(status_code)s, %(transmitter)s, %(frequency)s, %(pull_date)s, %(original_waterfall)s,
+                  %(greyscaled_waterfall)s, %(thresholded_waterfall)s, %(waterfall_length)s, %(waterfall_width)s);""",
                             {'satnogs_id': satnogs_id, 'satellite_name': satellite_name,
                              'station_name': station_name, 'status': status,
                              'status_code': status_code,
@@ -159,8 +159,22 @@ class Observation:
 
 
 if __name__ == "__main__":
+
+    print("\nTesting Observation Interactions\n")
+
+    satnogs_id1 = 7808415
+    satnogs_id2 = 7808611
+
     observation_interactor = ObservationInteractor()
+    print("Adding Empty Entry:")
+    observation_interactor.add_empty_observation(satnogs_id=satnogs_id2)
+    print(observation_interactor.get_observations())
 
-    observation_interactor.add_empty_observation(satnogs_id=123456)
+    print("\nAdding Filled Entry:")
+    observation_interactor.add_observation(*si.fetch_satnogs(satnogs_id1))
+    print(observation_interactor.get_observations())
 
+    print("\nUpdating Empty Entry:")
+    observation_id = observation_interactor.get_observation_by_satnogs_id(satnogs_id=satnogs_id2).observation_id
+    observation_interactor.update_observation(observation_id, *si.fetch_satnogs(satnogs_id2))
     print(observation_interactor.get_observations())
