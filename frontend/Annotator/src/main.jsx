@@ -11,8 +11,9 @@ import ErrorPage from "./error-page";
 import CreateAccount from "./routes/createAccount";
 import Login from "./routes/login"
 import ShowAllItems from "./routes/allItems"
-import OwnedItems from "./routes/OwnedItems"
-import CreateItem from "./routes/CreateItem"
+import OwnedAnnotations from "./routes/OwnedAnnotations"
+import StartAnnotation from "./routes/StartAnnotation"
+import CreateAnnotation from "./routes/CreateAnnotation"
 import EditItem from "./routes/EditItem"
 import Index from "./routes/Index"
 
@@ -36,17 +37,21 @@ const router = createBrowserRouter([
         element: <ShowAllItems />
         },
         {
-        path: "yourItems",
-        element: <OwnedItems />
+        path: "yourAnnotations",
+        element: <OwnedAnnotations />
         },
         {
-          path: "CreateItem",
-          element: <CreateItem />
+        path: "StartAnnotation",
+        element: <StartAnnotation />
+        },
+        {
+          path: "CreateAnnotation",
+          element: <CreateAnnotation />
           },
-          {
-          path: "EditItem",
-          element: <EditItem />
-          },
+        {
+        path: "EditItem",
+        element: <EditItem />
+        },
     ]
   },
 ]);

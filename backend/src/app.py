@@ -1,7 +1,7 @@
 import json
 import dataclasses
 import datetime
-from flask import Flask, request, Response
+from flask import Flask, request, Response, send_file
 from flask_cors import CORS
 import random
 import hashlib
@@ -13,15 +13,15 @@ from permission_interactions import PermissionInteractor
 from role_interactions import RoleInteractor
 from session_interactions import SessionInteractor
 from task_interactions import TaskInteractor
-
+import satnogs_interactions as si
 
 app = Flask(__name__)
 CORS(app)
 
 account_actor = AccountInteractions()
 annotation_actor = AnnotationInteractor()
-observation_actor =  ObservationInteractor()
-permission_actor =  PermissionInteractor()
+observation_actor = ObservationInteractor()
+permission_actor = PermissionInteractor()
 role_actor = RoleInteractor()
 session_actor = SessionInteractor()
 task_actor = TaskInteractor()
@@ -35,6 +35,7 @@ class Status(int, Enum):
     ACCOUNT_LOCKED = 2
     AUTHENTICATION_FAILURE = 3
     PERMISSION_DENIED = 4
+    MISSING = 5
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -114,7 +115,7 @@ def create_account():
     role = role_actor.get_role_by_name(role_name)
 
     status = account_actor.create_account(role_id=role.role_id, first_name=first_name, last_name=last_name,
-                                       user_name=username, password=password, salt=salt)
+                                          user_name=username, password=password, salt=salt)
 
     return Response(json.dumps({'created': status}), status=200, mimetype='application/json')
 
@@ -136,7 +137,7 @@ def update_account():
     if valid_session(session):
         new_password = create_hash(clear_text=password_not_hashed, salt=current_user_account.salt)
         account_actor.update_account(account_id=current_user_account.account_id, first_name=first_name,
-                                  last_name=last_name, user_name=username, password=new_password)
+                                     last_name=last_name, user_name=username, password=new_password)
 
         return Response(json.dumps({"status": Status.SUCCESS}), status=200, mimetype='application/json')
 
@@ -221,7 +222,7 @@ def create_item():
 
     if valid_session(session):
         annotation_actor.add_annotation(account_id=current_user_account.account_id, observation_id=observation_id,
-                            upper_left=upper_left, lower_right=lower_right)
+                                        upper_left=upper_left, lower_right=lower_right)
         return Response(json.dumps({"status": Status.SUCCESS}), status=200, mimetype='application/json')
     else:
         return Response(json.dumps({"status": Status.PERMISSION_DENIED}), status=200, mimetype='application/json')
@@ -270,6 +271,42 @@ def delete_item():
     else:
         return Response(json.dumps({"status": Status.AUTHENTICATION_FAILURE}), status=200, mimetype='application/json')
 
+
+@app.route('/pullSatnogs', methods=['POST'])
+def pull_satnogs():
+    satnogs_id = request.json['satnogs_id']
+    observation_actor.add_observation(*si.fetch_satnogs(satnogs_id))
+    return Response(json.dumps({"status": Status.SUCCESS}), status=200, mimetype='application/json')
+
+
+@app.route('/observation', methods=['GET'])
+def get_observation():
+    args = request.args
+    satnogs_id = args['satnogs_id']
+    observation = observation_actor.get_observation_by_satnogs_id(satnogs_id=satnogs_id)
+
+    if observation is not None:
+        rtn_dict = {
+            'satnogs_id': observation.satnogs_id,
+            'status': Status.SUCCESS
+        }
+        return Response(json.dumps(rtn_dict), status=200, mimetype='application/json')
+    else:
+        return Response(json.dumps({"status": Status.MISSING}), status=200, mimetype='application/json')
+
+@app.route("/images", methods=["GET"])
+def get_image():
+    satnogs_id = request.args.get('satnogs_id')
+    image_type = request.args.get('type')
+
+    if image_type == 'origional':
+
+    elif image_type == 'grey_scale':
+
+    elif image_type == 'thresholded':
+
+
+    return send_file(image_name + '.png', mimetype='image/png')
 
 @app.route('/')
 def home():

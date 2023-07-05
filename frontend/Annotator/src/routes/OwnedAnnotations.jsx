@@ -6,7 +6,7 @@ import ItemCardOwned from "../itemCardOwned"
 
 
 
-export default function OwnedItems() {
+export default function OwnedAnnotations() {
     const [items, setItems] = useState([]);
    // const [accountID, setAccountID] = useState(-1);
     const [session, setSession] = useState("");
@@ -33,7 +33,7 @@ export default function OwnedItems() {
     
     return (
         <div class="container">
-            <a class="btn btn-primary" href="/CreateItem" role="button">Add Item</a>
+            <a class="btn btn-primary" href="/StartAnnotation" role="button">Start Annotation</a>
             <hr />
         <div class="row flex-row">
         {items.map(item => ItemCardOwned(item, session, username))}

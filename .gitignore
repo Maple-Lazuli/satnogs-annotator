@@ -1,6 +1,6 @@
 backend/venv/*
 backend/.idea/*
 backend/test_notebooks/*
-frontend/Inventory/node_modules/*
+frontend/Annotator/node_modules/*
 backend/src/__pycache__/*
 backend/src/satnogs-data/*
