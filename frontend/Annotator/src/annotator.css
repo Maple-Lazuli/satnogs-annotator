@@ -1,0 +1,25 @@
+.overlay{
+    background-color: rgba(230, 229, 223, 0.555);
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw;
+    height: 100vh;
+    z-index: 990;
+    padding: 200 px;
+}
+
+.image{
+    height: 95vh;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+.annotation{
+    background-color: rgba(255, 5, 5, 0.112);
+    border:1px solid red;
+}

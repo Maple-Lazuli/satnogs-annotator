@@ -5,6 +5,7 @@ from flask import Flask, request, Response, send_file
 from flask_cors import CORS
 import random
 import hashlib
+import tempfile
 
 from account_interactions import AccountInteractions
 from annotation_interactions import AnnotationInteractor
@@ -107,7 +108,7 @@ def create_account():
     password = create_hash(password_not_hashed, salt)
 
     role = role_actor.get_role_by_name(role_name)
-
+    print(role)
     if role is None:
         role_actor.create_new_role(role_name=role_name)
         print("Created Role")
@@ -288,25 +289,34 @@ def get_observation():
     if observation is not None:
         rtn_dict = {
             'satnogs_id': observation.satnogs_id,
-            'status': Status.SUCCESS
+            'status': Status.SUCCESS,
+            'width': observation.waterfall_width,
+            'length': observation.waterfall_length
         }
         return Response(json.dumps(rtn_dict), status=200, mimetype='application/json')
     else:
         return Response(json.dumps({"status": Status.MISSING}), status=200, mimetype='application/json')
 
+
 @app.route("/images", methods=["GET"])
 def get_image():
     satnogs_id = request.args.get('satnogs_id')
-    image_type = request.args.get('type')
+    image_type = request.args.get('type').strip()
+    observation = ObservationInteractor().get_observation_by_satnogs_id(satnogs_id)
 
-    if image_type == 'origional':
+    if observation is None:
+        return send_file("missing.png", mimetype='image/png')
 
-    elif image_type == 'grey_scale':
+    elif image_type == 'origional':
+        with tempfile.NamedTemporaryFile() as temp:
+            temp.write(observation.original_waterfall)
+            return send_file(temp.name, mimetype='image/png')
+    # elif image_type == 'grey_scale':
+    #
+    # elif image_type == 'thresholded':
 
-    elif image_type == 'thresholded':
+    return send_file("missing.png", mimetype='image/png')
 
-
-    return send_file(image_name + '.png', mimetype='image/png')
 
 @app.route('/')
 def home():
