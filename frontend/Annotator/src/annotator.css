@@ -20,7 +20,14 @@
     user-select: none;
 }
 
-.annotation{
+.annotationStart{
     background-color: rgba(255, 5, 5, 0.112);
     border:1px solid red;
+    position: absolute;
+}
+
+.annotationSaved{
+    background-color: rgba(255, 5, 5, 0.112);
+    border:1px solid rgb(229, 255, 0);
+    position: absolute;
 }

@@ -78,7 +78,7 @@ export default function CreateAnnotation() {
 
     return (
     <form onSubmit={onFormSubmit}>
-      {Annotator(window.location.search.split("=")[1], selection, setAnnotations, clearType)}
+      {Annotator(window.location.search.split("=")[1], selection,annotations, setAnnotations, clearType)}
       { status < 0 ? (
         <div className="spinner-border" style={{width: "3rem", height: "3rem"}} role="status">
         <span className="visually-hidden">Loading...</span>
