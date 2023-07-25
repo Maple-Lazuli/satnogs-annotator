@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import {getUsername, getSession} from '../credentials'
+
 import {redirect, useNavigate} from "react-router-dom";
 import axios from 'axios';
 import Backend from '../api';
@@ -11,6 +12,7 @@ export default function CreateAnnotation() {
   const [annotations, setAnnotations] = useState([]);
   const [username, setUsername] = useState("");
   const [session, setSession] = useState("");
+  const [selection, setSelection] = useState("");
   
     const navigate = useNavigate()
 
@@ -57,10 +59,26 @@ export default function CreateAnnotation() {
       fetchObservation()
     }
    
+    const toggleOriginal = () => {
+      if (selection == "origional"){setSelection("")}
+      else {setSelection("origional")}
+    }
+
+    const toggleGreyscaled = () => {
+      if (selection == "greyscale"){setSelection("")}
+      else {setSelection("greyscale")}
+    }
+
+    const toggleThreshold = () => {
+      if (selection == "threshold"){setSelection("")}
+      else {setSelection("threshold")}
+    }
+
+    const clearType = () => {setSelection("")}
 
     return (
     <form onSubmit={onFormSubmit}>
-      {Annotator(window.location.search.split("=")[1], 'origional', setAnnotations)}
+      {Annotator(window.location.search.split("=")[1], selection, setAnnotations, clearType)}
       { status < 0 ? (
         <div className="spinner-border" style={{width: "3rem", height: "3rem"}} role="status">
         <span className="visually-hidden">Loading...</span>
@@ -81,13 +99,13 @@ export default function CreateAnnotation() {
         <br />
         <div className="row">
         <div className="col">
-        <img src={`http://localhost:5001/images?satnogs_id=7808415&type=origional`} className="img-fluid"/>
+        <img src={`http://localhost:5001/images?satnogs_id=${window.location.search.split("=")[1]}&type=origional`} className="img-fluid" onClick={toggleOriginal}/>
           </div>
           <div className="col">
-            Greyscaled
+          <img src={`http://localhost:5001/images?satnogs_id=${window.location.search.split("=")[1]}&type=greyscale`} className="img-fluid" onClick={toggleGreyscaled}/>
           </div>
           <div className="col">
-            Thresholded
+          <img src={`http://localhost:5001/images?satnogs_id=${window.location.search.split("=")[1]}&type=threshold`} className="img-fluid" onClick={toggleThreshold}/>
           </div>
         </div>
       </div>)}

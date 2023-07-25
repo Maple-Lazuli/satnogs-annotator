@@ -1,12 +1,13 @@
 import React, {useState} from "react";
 import './annotator.css'
 
-export default function Annotator(satnogs_id,type, setAnnotations) {  
+export default function Annotator(satnogs_id,type, setAnnotations, clearType) {  
     const [capture, setCapture] = useState(false);
     const [upperLeft, setUpperLeft] = useState(-1);
     const [currentPos, setCurrentPos] = useState(-1);
     const [lowerRight, setLowerRight] = useState(-1);
     const [box, setBox] = useState(null)
+    
     
 
     const onFormSubmit = (event) => {
@@ -41,6 +42,7 @@ export default function Annotator(satnogs_id,type, setAnnotations) {
         d.style.left = x+'px';
         d.style.top = y+'px';
         d.classList.add('annotation')
+        d.addEventListener("contextmenu", () => remove(d))
         document.getElementById("imagediv").appendChild(d)
         return d
     }
@@ -49,11 +51,27 @@ export default function Annotator(satnogs_id,type, setAnnotations) {
         box.style.width = x - upperLeft[0] + 'px'
         box.style.height = y - upperLeft[1] + 'px'
     }
+
+    const remove = (d) => {
+        console.log("here I am")
+        d.remove()
+        setCapture(false)
+    }
     
 
+    const stopClick = (event) => {
+        event.stopPropagation()
+    }
+
+    const clear = () => {
+        setCapture(false)
+        clearType()
+    }
+
+
     return (
-        <div className = 'overlay'>
-            <div onMouseDown={() => startCapture(event)} id="imagediv" onMouseMove={() => trackMouse(event)} onMouseUp={()=> {stopCapture(event)}}>
+        <div className = 'overlay' hidden ={type == ""} onClick={clear}>
+            <div onMouseDown={() => startCapture(event)} id="imagediv" onMouseMove={() => trackMouse(event)} onMouseUp={()=> {stopCapture(event)}} onClick={stopClick}>
             <img src={`http://localhost:5001/images?satnogs_id=${satnogs_id}&type=${type}`} className="image" draggable={false}></img>
             </div>
         </div>
