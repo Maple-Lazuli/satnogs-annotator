@@ -4,3 +4,4 @@ backend/test_notebooks/*
 frontend/Annotator/node_modules/*
 backend/src/__pycache__/*
 backend/src/satnogs-data/*
+backend/src/temp/*
