@@ -245,8 +245,12 @@ def get_item():
 @app.route('/annotation', methods=['POST'])
 def create_item():
     observation_id = request.json['observation_id']
-    upper_left = request.json['upper_left']
-    lower_right = request.json['lower_right']
+    x0 = request.json['x0']
+    y0 = request.json['y0']
+    x1 = request.json['x1']
+    y1 = request.json['y1']
+    image_width = request.json['image_width']
+    image_height = request.json['image_height']
     session_code = request.headers.get('Authorization').split(" ")[1]
     current_user = request.headers.get('Authorization').split(" ")[0]
 
@@ -255,7 +259,7 @@ def create_item():
 
     if valid_session(session):
         annotation_actor.add_annotation(account_id=current_user_account.account_id, observation_id=observation_id,
-                                        upper_left=upper_left, lower_right=lower_right)
+                                        x0=x0, y0=y0, x1=x1, y1=y1, image_height=image_height, image_width=image_width)
         return Response(json.dumps({"status": Status.SUCCESS}), status=200, mimetype='application/json')
     else:
         return Response(json.dumps({"status": Status.PERMISSION_DENIED}), status=200, mimetype='application/json')
@@ -264,9 +268,12 @@ def create_item():
 @app.route('/annotation', methods=['PUT'])
 def update_annotation():
     annotation_id = request.json['annotation_id']
-    upper_left = request.json['upper_left']
-    lower_right = request.json['lower_right']
-
+    x0 = request.json['x0']
+    y0 = request.json['y0']
+    x1 = request.json['x1']
+    y1 = request.json['y1']
+    image_width = request.json['image_width']
+    image_height = request.json['image_height']
     session_code = request.headers.get('Authorization').split(" ")[1]
     current_user = request.headers.get('Authorization').split(" ")[0]
 
@@ -278,7 +285,8 @@ def update_annotation():
         return Response(json.dumps({"status": Status.PERMISSION_DENIED}), status=200, mimetype='application/json')
 
     if valid_session(session):
-        annotation_actor.update_annotation(annotation_id=annotation_id, upper_left=upper_left, lower_right=lower_right)
+        annotation_actor.update_annotation(annotation_id=annotation_id, x0=x0, y0=y0, x1=x1, y1=y1,
+                                           image_height=image_height, image_width=image_width)
         return Response(json.dumps({"status": Status.SUCCESS}), status=200, mimetype='application/json')
     else:
         return Response(json.dumps({"status": Status.PERMISSION_DENIED}), status=200, mimetype='application/json')
