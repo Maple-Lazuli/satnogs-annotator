@@ -63,10 +63,15 @@ CREATE TABLE annotations (
 	annotation_id serial PRIMARY KEY,
 	account_id INT NOT NULL,
 	observation_id INT NOT NULL,
-	upper_left INT[] NOT NULL,
-	lower_right INT[] NOT NULL,
 	creation_date TIMESTAMP NOT NULL,
-	modification_date TIMESTAMP,
+	x0 FLOAT NOT NULL,
+	y0 FLOAT NOT NULL,
+	x1 FLOAT NOT NULL,
+	y1 FLOAT NOT NULL,
+	annotation_width FLOAT NOT NULL,
+	annotation_height FLOAT NOT NULL,
+	image_width FLOAT NOT NULL,
+	image_height FLOAT NOT NULL,
 	FOREIGN KEY (account_id) REFERENCES accounts (account_id),
 	FOREIGN KEY (observation_id) REFERENCES observations (observation_id)
 );
