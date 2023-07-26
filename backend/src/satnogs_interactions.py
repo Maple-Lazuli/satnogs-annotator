@@ -26,7 +26,6 @@ def fetch_satnogs(satnogs_id):
     threshold = (numpy_image - numpy_image.min()) / (numpy_image.max() - numpy_image.min())
     thresholded_image = threshold < threshold.mean() + threshold.std() * 1.5
 
-
     # clean up the transmitter:
     transmitter = results['Transmitter'].split()
     transmitter = " ".join(transmitter)

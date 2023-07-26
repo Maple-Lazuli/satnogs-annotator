@@ -68,8 +68,8 @@ class PermissionChange:
 
 if __name__ == "__main__":
 
-    account_interactor = ai.AccountInteractions()
-    role_interactor = ri.RoleInteractions()
+    account_interactor = ai.AccountInteractor()
+    role_interactor = ri.RoleInteractor()
     permission_interactor = PermissionInteractor()
 
     role_id = role_interactor.get_roles()[1].role_id

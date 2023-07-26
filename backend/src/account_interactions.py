@@ -8,7 +8,7 @@ import role_interactions as ri
 
 
 @dataclass
-class AccountInteractions:
+class AccountInteractor:
     db_name: str = pod.db_name
     db_user: str = pod.db_user
     db_pass: str = pod.db_pass
@@ -159,9 +159,9 @@ class Account:
 
 
 if __name__ == "__main__":
-    role_interactor = ri.RoleInteractions()
+    role_interactor = ri.RoleInteractor()
 
-    account_interactor = AccountInteractions()
+    account_interactor = AccountInteractor()
 
     roles = role_interactor.get_roles()[0]
     id = roles.role_id

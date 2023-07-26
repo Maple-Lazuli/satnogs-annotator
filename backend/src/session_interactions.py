@@ -62,7 +62,7 @@ class Session:
 
 
 if __name__ == "__main__":
-    account_interactor = ai.AccountInteractions()
+    account_interactor = ai.AccountInteractor()
     session_interactor = SessionInteractor()
 
     account_id = account_interactor.get_account_by_username(user_name='adalazi').account_id

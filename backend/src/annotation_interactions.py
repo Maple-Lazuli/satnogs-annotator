@@ -105,13 +105,18 @@ class AnnotationInteractor:
             print(e)
             return fetched_annotations
 
-    def update_annotation(self, annotation_id, upper_left, lower_right):
+    def update_annotation(self, annotation_id, x0, y0, x1, y1,
+                       image_width, image_height):
         try:
             with self.connection, self.connection.cursor() as cur:
-                cur.execute(f"""update annotations SET upper_left = %(upper_left)s, lower_right = %(lower_right)s, 
-                 modification_date = %(modification_date)s where annotation_id = %(annotation_id)s;""",
-                            {'annotation_id': annotation_id, 'upper_left': upper_left, 'lower_right': lower_right,
-                             'modification_date': datetime.now()})
+                cur.execute(f"""update annotations SET x0 = %(x0)s, y0 = %(y0)s, x1 = %(x1)s, y1 = %(y1)s, 
+                annotation_height = %(annotation_height)s, annotation_width = %(annotation_width)s,
+                 image_width = %(image_width)s, image_height = %(image_height)s
+                 where annotation_id = %(annotation_id)s;""",
+                            {'annotation_id': annotation_id,
+                             'x0': x0, 'y0': y0, 'x1': x1, 'y1': y1, 'annotation_width': x1 - x0,
+                             'annotation_height': y1 - y0, 'image_width': image_width,
+                             'image_height': image_height})
                 return True
         except Exception as e:
             print(e)
@@ -129,13 +134,19 @@ class AnnotationInteractor:
             print(e)
             return False
 
-    def add_annotation(self, account_id, observation_id, upper_left, lower_right):
+    def add_annotation(self, account_id, observation_id, x0, y0, x1, y1,
+                       image_width, image_height):
         try:
             with self.connection, self.connection.cursor() as cur:
-                cur.execute(f"""INSERT INTO annotations (account_id, observation_id, upper_left, lower_right, creation_date)
-                 VALUES (%(account_id)s,%(observation_id)s,%(upper_left)s,%(lower_right)s,%(creation_date)s);""",
-                            {'account_id': account_id, 'observation_id': observation_id, 'upper_left': upper_left,
-                             'lower_right': lower_right, 'creation_date': datetime.now()})
+                cur.execute(f"""INSERT INTO annotations (account_id, observation_id, creation_date, x0, y0, x1, y1,
+                annotation_width, annotation_height, image_width, image_height) VALUES (%(account_id)s,
+                %(observation_id)s,%(creation_date)s,%(x0)s,%(y0)s,%(x1)s,%(y1)s,%(annotation_width)s,
+                %(annotation_height)s,%(image_width)s,%(image_height)s);""",
+                            {'account_id': account_id, 'observation_id': observation_id,
+                             'creation_date': datetime.now(),
+                             'x0': x0, 'y0': y0, 'x1': x1, 'y1': y1, 'annotation_width': x1 - x0,
+                             'annotation_height': y1 - y0, 'image_width': image_width,
+                             'image_height': image_height})
             return True
 
         except Exception as e:
@@ -148,14 +159,20 @@ class Annotation:
     annotation_id: int
     account_id: int
     observation_id: int
-    upper_left: list
-    lower_right: list
     creation_date: datetime
-    modification_date: datetime
+    x0: float
+    y0: float
+    x1: float
+    y1: float
+    annotation_width: float
+    annotation_height: float
+    image_width: float
+    image_height: float
+
 
 
 if __name__ == "__main__":
-    account_interactor = ai.AccountInteractions()
+    account_interactor = ai.AccountInteractor()
     observation_interactor = oi.ObservationInteractor()
 
     annotation_interactor = AnnotationInteractor()
@@ -171,16 +188,17 @@ if __name__ == "__main__":
 
     print(f"Account_id:{account_id} and Observation_id:{observation_id}")
 
-    annotation_interactor.add_annotation(account_id=account_id, observation_id=observation_id, upper_left=[1, 2, 3],
-                                         lower_right=[5, 6, 7])
+    annotation_interactor.add_annotation(account_id=account_id, observation_id=observation_id, x0=0, y0=0, x1=1, y1=1,
+                                         image_width=1, image_height=1)
 
     pprint(annotation_interactor.get_annotations())
 
     print("\nUpdating An Annotation")
 
     annotation_id = annotation_interactor.get_annotation_by_account_and_observation(account_id=account_id,
-                                                            observation_id=observation_id).annotation_id
+                                                                                    observation_id=observation_id).annotation_id
 
-    annotation_interactor.update_annotation(annotation_id=annotation_id, upper_left=[9, 8, 7], lower_right=[1, 4, 8])
+    annotation_interactor.update_annotation(annotation_id=annotation_id, x0=0, y0=0, x1=.5, y1=.5, image_width=1,
+                                            image_height=1)
 
     pprint(annotation_interactor.get_annotations())

@@ -12,7 +12,7 @@ import numpy as np
 from matplotlib import cm
 from PIL import Image
 
-from account_interactions import AccountInteractions
+from account_interactions import AccountInteractor
 from annotation_interactions import AnnotationInteractor
 from observation_interactions import ObservationInteractor
 from permission_interactions import PermissionInteractor
@@ -24,7 +24,7 @@ import satnogs_interactions as si
 app = Flask(__name__)
 CORS(app)
 
-account_actor = AccountInteractions()
+account_actor = AccountInteractor()
 annotation_actor = AnnotationInteractor()
 observation_actor = ObservationInteractor()
 permission_actor = PermissionInteractor()
