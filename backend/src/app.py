@@ -1,11 +1,16 @@
 import json
 import dataclasses
 import datetime
+import os.path
+
 from flask import Flask, request, Response, send_file
 from flask_cors import CORS
 import random
 import hashlib
 import tempfile
+import numpy as np
+from matplotlib import cm
+from PIL import Image
 
 from account_interactions import AccountInteractions
 from annotation_interactions import AnnotationInteractor
@@ -62,6 +67,11 @@ def verify_hash(clear_text, salt, stored_hash):
     return generated_hash == stored_hash
 
 
+def verify_directory(directory):
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+
+
 def valid_session(session):
     if session is None:
         return False
@@ -77,6 +87,28 @@ def sanitize_account(account):
     account.first_name = "Sanitized"
     account.last_name = "Sanitized"
     return account
+
+
+def get_image_from_bytes(bytes, shape, save_dir, color_map=""):
+    bytes_name = os.path.join(save_dir, create_hash(str(datetime.datetime.now()), random.randint(1, 1000000))) + ".dat"
+    with open(bytes_name, "wb") as file_out:
+        file_out.write(bytes)
+
+    spectrogram = np.fromfile(bytes_name, dtype=np.uint8).reshape(shape[0], shape[1])
+
+    if color_map == "viridis":
+        im = Image.fromarray(np.uint8(cm.viridis(spectrogram) * 255)).convert("RGB")
+    elif color_map == "threshold":
+        im = Image.fromarray(np.uint8(cm.viridis(spectrogram) * 255)).convert("RGB")
+
+    else:
+        im = Image.fromarray(spectrogram * 255).convert('L').convert("RGB")
+
+    save_name = os.path.join(save_dir, create_hash(str(datetime.datetime.now()), random.randint(1, 1000000))) + ".jpg"
+
+    im.save(save_name)
+
+    return save_name
 
 
 @app.route('/account', methods=['GET'])
@@ -230,7 +262,7 @@ def create_item():
 
 
 @app.route('/annotation', methods=['PUT'])
-def update_item():
+def update_annotation():
     annotation_id = request.json['annotation_id']
     upper_left = request.json['upper_left']
     lower_right = request.json['lower_right']
@@ -253,7 +285,7 @@ def update_item():
 
 
 @app.route('/annotation', methods=['DELETE'])
-def delete_item():
+def delete_annotation():
     annotation_id = request.json['annotation_id']
     session_code = request.headers.get('Authorization').split(" ")[1]
     current_user = request.headers.get('Authorization').split(" ")[0]
@@ -300,6 +332,9 @@ def get_observation():
 
 @app.route("/images", methods=["GET"])
 def get_image():
+    temp_dir = "./temp"
+    verify_directory(temp_dir)
+
     satnogs_id = request.args.get('satnogs_id')
     image_type = request.args.get('type').strip()
     observation = ObservationInteractor().get_observation_by_satnogs_id(satnogs_id)
@@ -308,12 +343,22 @@ def get_image():
         return send_file("missing.png", mimetype='image/png')
 
     elif image_type == 'origional':
-        with tempfile.NamedTemporaryFile() as temp:
-            temp.write(observation.original_waterfall)
-            return send_file(temp.name, mimetype='image/png')
-    # elif image_type == 'grey_scale':
-    #
-    # elif image_type == 'thresholded':
+        image_name = get_image_from_bytes(observation.greyscale_waterfall, (observation.waterfall_length,
+                                                                            observation.waterfall_width),
+                                          temp_dir, color_map="viridis")
+        return send_file(image_name, mimetype='image/png')
+
+    elif image_type == 'greyscale':
+        image_name = get_image_from_bytes(observation.greyscale_waterfall, (observation.waterfall_length,
+                                                                            observation.waterfall_width),
+                                          temp_dir)
+        return send_file(image_name, mimetype='image/png')
+
+    elif image_type == 'threshold':
+        image_name = get_image_from_bytes(observation.threshold_waterfall, (observation.waterfall_length,
+                                                                            observation.waterfall_width),
+                                          temp_dir, color_map="thshold")
+        return send_file(image_name, mimetype='image/png')
 
     return send_file("missing.png", mimetype='image/png')
 
