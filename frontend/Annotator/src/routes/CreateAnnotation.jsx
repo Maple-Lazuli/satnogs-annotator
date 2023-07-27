@@ -18,6 +18,11 @@ export default function CreateAnnotation() {
 
     const onFormSubmit = (event) => {
         event.preventDefault();
+
+        getSession().then(s => setSession(s))
+        getUsername().then(u => setUsername(u))
+        
+        submitAnnotations(annotations[0]);
       };
 
 
@@ -30,16 +35,18 @@ export default function CreateAnnotation() {
         }
       })
 
-    const onItemSubmit = async (annotations) => {
-      getSession().then(s => setSession(s))
-      getUsername().then(u => setUsername(u))
+    const submitAnnotations = async (annotation) => {
       
         const response = await BackendAuthorized.post(
             '/annotations', {
-              annotations: annotations,
-                    observation_id: observation_id
+              x0: annotation['upperLeft'][0],
+              y0: annotation['upperLeft'][1],
+              x1: annotation['lowerRight'][0],
+              y1: annotation['lowerRight'][1],
+              image_width: annotation['imageWidth'],
+              image_height: annotation['imageHeight'],
+              observation_id: window.location.search.split("=")[1]
               }).then( (res) => {
-
                 navigate("/YourAnnotations");
     })}
 
@@ -76,6 +83,10 @@ export default function CreateAnnotation() {
 
     const clearType = () => {setSelection("")}
 
+    const parsed_annotations = () => {
+      return annotations.map(ann => `UL:(${ann['upperLeft'].join(",")}) LR:(${ann['lowerRight'].join(",")})`).join(' , ')
+    }
+
     return (
     <form onSubmit={onFormSubmit}>
       {Annotator(window.location.search.split("=")[1], selection,annotations, setAnnotations, clearType)}
@@ -111,10 +122,11 @@ export default function CreateAnnotation() {
       </div>)}
         <div className="mb-3">
         <label htmlFor="annotations" className="form-label">Annotations:</label>
-        <input type="text" className="form-control" id="annotations" value={annotations}
-        onChange={() => setAnnotations(event.target.value)}/>
-        {/* Add a submit button here */}
+        <textarea type="textarea" className="form-control" id="annotations"  disabled={true} value={parsed_annotations()}
+        onChange={() => setAnnotations(event.target.value)} style={{'padding': "4px"}}/>
         </div>
+      <button type="submit" className="btn btn-primary" style={{'margin': "4px"}}>Submit Annotations</button>
+      <button type="button" className="btn btn-secondary" style={{'margin': "4px"}}onClick={() => setAnnotations([])}>Clear Annotations</button>
     </form>
     );
   }

@@ -6,7 +6,7 @@ export default function Annotator(satnogs_id,type,annotations, setAnnotations, c
     const [capture, setCapture] = useState(false);
     const [upperLeft, setUpperLeft] = useState(-1);
     const [currentPos, setCurrentPos] = useState(-1);
-    const [lowerRight, setLowerRight] = useState(-1);
+    // const [lowerRight, setLowerRight] = useState(-1);
     const [box, setBox] = useState(null)    
 
     const onFormSubmit = (event) => {
@@ -28,18 +28,24 @@ export default function Annotator(satnogs_id,type,annotations, setAnnotations, c
     }
     const stopCapture = (event) => {
         setCapture(false)
-        setLowerRight([event.clientX - event.target.getBoundingClientRect().left,
-            event.clientY - event.target.getBoundingClientRect().top])
+        // setLowerRight([event.clientX - event.target.getBoundingClientRect().left,
+        //     event.clientY - event.target.getBoundingClientRect().top])
         box.remove()
-        annotations.push({
-            'parentLeft':event.target.getBoundingClientRect().left,
-            'parentTop':event.target.getBoundingClientRect().top,
-            'upperLeft':upperLeft,
-            'lowerRight':[event.clientX - event.target.getBoundingClientRect().left,
-                            event.clientY - event.target.getBoundingClientRect().top],
-            'key':annotations.length
-        })
-        setAnnotations(annotations)
+
+
+        if (((event.clientX - event.target.getBoundingClientRect().left - upperLeft[0]) > 5) && 
+            ((event.clientY - event.target.getBoundingClientRect().top - upperLeft[1]) > 2)){
+                annotations.push({
+                    'parentLeft':event.target.getBoundingClientRect().left,
+                    'parentTop':event.target.getBoundingClientRect().top,
+                    'imageWidth':event.target.getBoundingClientRect().width,
+                    'imageHeight':event.target.getBoundingClientRect().height,
+                    'upperLeft':upperLeft,
+                    'lowerRight':[event.clientX - event.target.getBoundingClientRect().left,
+                                    event.clientY - event.target.getBoundingClientRect().top],
+                    'key':annotations.length})
+                setAnnotations(annotations)
+            }
     }
 
     const createDiv = (x, y) => {

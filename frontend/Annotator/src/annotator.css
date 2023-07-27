@@ -18,16 +18,19 @@
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
     user-select: none;
+    cursor: crosshair
 }
 
 .annotationStart{
     background-color: rgba(255, 5, 5, 0.112);
     border:1px solid red;
     position: absolute;
+    cursor: crosshair
 }
 
 .annotationSaved{
     background-color: rgba(255, 5, 5, 0.112);
     border:1px solid rgb(229, 255, 0);
     position: absolute;
+    cursor: pointer
 }
