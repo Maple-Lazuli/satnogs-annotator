@@ -106,7 +106,7 @@ class AnnotationInteractor:
             return fetched_annotations
 
     def update_annotation(self, annotation_id, x0, y0, x1, y1,
-                       image_width, image_height):
+                          image_width, image_height):
         try:
             with self.connection, self.connection.cursor() as cur:
                 cur.execute(f"""update annotations SET x0 = %(x0)s, y0 = %(y0)s, x1 = %(x1)s, y1 = %(y1)s, 
@@ -127,6 +127,18 @@ class AnnotationInteractor:
             with self.connection, self.connection.cursor() as cur:
                 cur.execute(f"delete from annotations where annotation_id = %(annotation_id)s;",
                             {'annotation_id': annotation_id})
+
+            return True
+
+        except Exception as e:
+            print(e)
+            return False
+
+    def delete_annotations_by_observation_id(self, observation_id):
+        try:
+            with self.connection, self.connection.cursor() as cur:
+                cur.execute(f"delete from annotations where observation_id = %(observation_id)s;",
+                            {'observation_id': observation_id})
 
             return True
 
@@ -168,7 +180,6 @@ class Annotation:
     annotation_height: float
     image_width: float
     image_height: float
-
 
 
 if __name__ == "__main__":

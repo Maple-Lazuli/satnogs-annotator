@@ -43,7 +43,7 @@ class SessionInteractor:
                 cur.execute(f"""INSERT INTO sessions (account_id, creation_date, end_date, session_code) VALUES
                  (%(account_id)s,%(creation_date)s,%(end_date)s,%(session_code)s);""",
                             {'account_id': account_id, 'creation_date': datetime.now(),
-                             'end_date': datetime.now() + timedelta(hours=10),
+                             'end_date': datetime.now() + timedelta(hours=24),
                              'session_code': code})
             return code
 

@@ -20,6 +20,7 @@ from role_interactions import RoleInteractor
 from session_interactions import SessionInteractor
 from task_interactions import TaskInteractor
 import satnogs_interactions as si
+import tarfile
 
 app = Flask(__name__)
 CORS(app)
@@ -89,8 +90,10 @@ def sanitize_account(account):
     return account
 
 
-def get_image_from_bytes(bytes, shape, save_dir, color_map=""):
-    bytes_name = os.path.join(save_dir, create_hash(str(datetime.datetime.now()), random.randint(1, 1000000))) + ".dat"
+def get_image_from_bytes(bytes, shape, save_dir, color_map="", save_name=None):
+    if save_name is None:
+        save_name = create_hash(str(datetime.datetime.now()), random.randint(1, 1000000))
+    bytes_name = os.path.join(save_dir, save_name+".dat")
     with open(bytes_name, "wb") as file_out:
         file_out.write(bytes)
 
@@ -100,11 +103,10 @@ def get_image_from_bytes(bytes, shape, save_dir, color_map=""):
         im = Image.fromarray(np.uint8(cm.viridis(spectrogram) * 255)).convert("RGB")
     elif color_map == "threshold":
         im = Image.fromarray(np.uint8(cm.viridis(spectrogram) * 255)).convert("RGB")
-
     else:
         im = Image.fromarray(spectrogram * 255).convert('L').convert("RGB")
 
-    save_name = os.path.join(save_dir, create_hash(str(datetime.datetime.now()), random.randint(1, 1000000))) + ".jpg"
+    save_name = os.path.join(save_dir, save_name) + ".jpg"
 
     im.save(save_name)
 
@@ -140,10 +142,8 @@ def create_account():
     password = create_hash(password_not_hashed, salt)
 
     role = role_actor.get_role_by_name(role_name)
-    print(role)
     if role is None:
         role_actor.create_new_role(role_name=role_name)
-        print("Created Role")
 
     role = role_actor.get_role_by_name(role_name)
 
@@ -216,13 +216,13 @@ def login():
 
 @app.route('/annotations', methods=['GET'])
 def get_annotations():
-    items = annotation_actor.get_annotations()
+    items = AnnotationInteractor().get_annotations()
     return Response(json.dumps(items, cls=JSONEncoder), status=200, mimetype='application/json')
 
 
 @app.route('/annotationsMapped', methods=['GET'])
 def get_annotations_mapped():
-    annotations = annotation_actor.get_annotations()
+    annotations = AnnotationInteractor().get_annotations()
     accounts = account_actor.get_accounts()
 
     for idx in range(len(annotations)):
@@ -234,17 +234,27 @@ def get_annotations_mapped():
     return Response(json.dumps(annotations, cls=JSONEncoder), status=200, mimetype='application/json')
 
 
-@app.route('/annotation', methods=['GET'])
-def get_item():
+@app.route('/annotationsByUsername', methods=['GET'])
+def get_annotation_by_username():
     args = request.args
-    annotation_id = args['annotation_id']
-    annotation = annotation_actor.get_annotation(annotation_id=annotation_id)
-    return Response(json.dumps(annotation, cls=JSONEncoder), status=200, mimetype='application/json')
+    username = args['username']
+    account = account_actor.get_account_by_username(user_name=username)
+    annotations = AnnotationInteractor().get_annotations_by_account_id(account_id=account.account_id)
+    return Response(json.dumps(annotations, cls=JSONEncoder), status=200, mimetype='application/json')
+
+
+@app.route('/annotationsBySatnogsID', methods=['GET'])
+def get_annotation_by_satnogs():
+    args = request.args
+    satnogs_id = args['satnogs_id']
+    observation = ObservationInteractor().get_observation_by_satnogs_id(satnogs_id)
+    annotations = AnnotationInteractor().get_annotations_by_observation_id(observation_id=observation.observation_id)
+    return Response(json.dumps(annotations, cls=JSONEncoder), status=200, mimetype='application/json')
 
 
 @app.route('/annotation', methods=['POST'])
 def create_item():
-    observation_id = request.json['observation_id']
+    satnogs_id = request.json['observation_id']
     x0 = request.json['x0']
     y0 = request.json['y0']
     x1 = request.json['x1']
@@ -253,13 +263,15 @@ def create_item():
     image_height = request.json['image_height']
     session_code = request.headers.get('Authorization').split(" ")[1]
     current_user = request.headers.get('Authorization').split(" ")[0]
-
     current_user_account = account_actor.get_account_by_username(current_user)
     session = session_actor.get_session(session_code, current_user_account.account_id)
 
     if valid_session(session):
-        annotation_actor.add_annotation(account_id=current_user_account.account_id, observation_id=observation_id,
-                                        x0=x0, y0=y0, x1=x1, y1=y1, image_height=image_height, image_width=image_width)
+        observation = ObservationInteractor().get_observation_by_satnogs_id(satnogs_id)
+        AnnotationInteractor().add_annotation(account_id=current_user_account.account_id,
+                                              observation_id=observation.observation_id,
+                                              x0=x0, y0=y0, x1=x1, y1=y1, image_height=image_height,
+                                              image_width=image_width)
         return Response(json.dumps({"status": Status.SUCCESS}), status=200, mimetype='application/json')
     else:
         return Response(json.dumps({"status": Status.PERMISSION_DENIED}), status=200, mimetype='application/json')
@@ -280,13 +292,13 @@ def update_annotation():
     current_user_account = account_actor.get_account_by_username(current_user)
     session = session_actor.get_session(session_code, current_user_account.account_id)
 
-    annotation = annotation_actor.get_annotation(annotation_id=annotation_id)
+    annotation = AnnotationInteractor().get_annotation(annotation_id=annotation_id)
     if annotation.account_id != current_user_account.account_id:
         return Response(json.dumps({"status": Status.PERMISSION_DENIED}), status=200, mimetype='application/json')
 
     if valid_session(session):
-        annotation_actor.update_annotation(annotation_id=annotation_id, x0=x0, y0=y0, x1=x1, y1=y1,
-                                           image_height=image_height, image_width=image_width)
+        AnnotationInteractor().update_annotation(annotation_id=annotation_id, x0=x0, y0=y0, x1=x1, y1=y1,
+                                                 image_height=image_height, image_width=image_width)
         return Response(json.dumps({"status": Status.SUCCESS}), status=200, mimetype='application/json')
     else:
         return Response(json.dumps({"status": Status.PERMISSION_DENIED}), status=200, mimetype='application/json')
@@ -294,20 +306,20 @@ def update_annotation():
 
 @app.route('/annotation', methods=['DELETE'])
 def delete_annotation():
-    annotation_id = request.json['annotation_id']
+    annotation_id = request.args['annotation_id']
     session_code = request.headers.get('Authorization').split(" ")[1]
     current_user = request.headers.get('Authorization').split(" ")[0]
 
     current_user_account = account_actor.get_account_by_username(current_user)
     session = session_actor.get_session(session_code, current_user_account.account_id)
 
-    annotation = annotation_actor.get_annotation(annotation_id=annotation_id)
+    annotation = AnnotationInteractor().get_annotation(annotation_id=annotation_id)
 
     if annotation.account_id != current_user_account.account_id:
         return Response(json.dumps({"status": Status.PERMISSION_DENIED}), status=200, mimetype='application/json')
 
     if valid_session(session):
-        annotation_actor.delete_annotation(annotation_id=annotation_id)
+        AnnotationInteractor().delete_annotation(annotation_id=annotation_id)
         return Response(json.dumps({"status": Status.SUCCESS}), status=200, mimetype='application/json')
     else:
         return Response(json.dumps({"status": Status.AUTHENTICATION_FAILURE}), status=200, mimetype='application/json')
@@ -316,7 +328,7 @@ def delete_annotation():
 @app.route('/pullSatnogs', methods=['POST'])
 def pull_satnogs():
     satnogs_id = request.json['satnogs_id']
-    observation_actor.add_observation(*si.fetch_satnogs(satnogs_id))
+    ObservationInteractor().add_observation(*si.fetch_satnogs(satnogs_id))
     return Response(json.dumps({"status": Status.SUCCESS}), status=200, mimetype='application/json')
 
 
@@ -324,7 +336,7 @@ def pull_satnogs():
 def get_observation():
     args = request.args
     satnogs_id = args['satnogs_id']
-    observation = observation_actor.get_observation_by_satnogs_id(satnogs_id=satnogs_id)
+    observation = ObservationInteractor().get_observation_by_satnogs_id(satnogs_id=satnogs_id)
 
     if observation is not None:
         rtn_dict = {
@@ -374,6 +386,37 @@ def get_image():
 @app.route('/')
 def home():
     return Response("Operational", status=200, mimetype='application/json')
+
+
+@app.route("/export", methods=["GET"])
+def export():
+    temp_dir = "./temp"
+    obervations = ObservationInteractor().get_observations()
+    observations_with_annotations = [observation for observation in obervations
+                                     if len(AnnotationInteractor().get_annotations_by_observation_id(
+            observation.observation_id)) > 0]
+
+    files = []
+    for observation in observations_with_annotations:
+        # create basename
+        basename = create_hash(str(datetime.datetime.now()), random.randint(1, 100000))
+        #  add the image to the list of files
+        files.append(get_image_from_bytes(observation.greyscale_waterfall, (1500,
+                                                                            600),
+                                          temp_dir, basename))
+        # get the annotations for that observation
+        annotations = AnnotationInteractor().get_annotations_by_observation_id(observation.observation_id)
+        # save the obsersavation annotations to the disk
+        json_name = os.path.join(temp_dir, f"{basename}.json")
+        with open(json_name, 'w') as file_out:
+            json.dump(annotations, file_out, cls=JSONEncoder)
+        files.append(json_name)
+    t_file = tarfile.open(os.path.join(temp_dir, "export.tar"), "w")
+    for file in files:
+        t_file.add(file)
+    t_file.close()
+
+    return send_file(os.path.join(temp_dir, "export.tar"), mimetype='application/x-tar')
 
 
 def main():
