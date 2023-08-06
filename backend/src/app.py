@@ -350,6 +350,18 @@ def get_observation():
         return Response(json.dumps({"status": Status.MISSING}), status=200, mimetype='application/json')
 
 
+@app.route('/observations', methods=['GET'])
+def get_observations():
+    observations = ObservationInteractor().get_observations()
+    for idx in range(len(observations)):
+        observation = observations[idx]
+        observation.greyscale_waterfall = None
+        observation.threshold_waterfall = None
+        observation.original_waterfall = None
+    return Response(json.dumps(observations, cls=JSONEncoder), status=200, mimetype='application/json')
+
+
+
 @app.route("/images", methods=["GET"])
 def get_image():
     temp_dir = "./temp"
