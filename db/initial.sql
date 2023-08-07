@@ -110,7 +110,7 @@ CREATE TABLE machine_images (
 	model_id INT NOT NULL,
 	observation_id INT NOT NULL,
 	creation_date TIMESTAMP NOT NULL,
-	thresholded_waterfall BYTEA NOT NULL,
+	waterfall BYTEA NOT NULL,
 	FOREIGN KEY (model_id) REFERENCES models (model_id),
 	FOREIGN KEY (observation_id) REFERENCES observations (observation_id)
 );
