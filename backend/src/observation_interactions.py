@@ -94,7 +94,7 @@ class ObservationInteractor:
             print(e)
             return fetched_observations
 
-    def delete_item(self, observation_id):
+    def delete_observation(self, observation_id):
         try:
             with self.connection, self.connection.cursor() as cur:
                 cur.execute(f"delete from observations where observation_id = %(observation_id)s;",

@@ -93,7 +93,7 @@ def sanitize_account(account):
 def get_image_from_bytes(bytes, shape, save_dir, color_map="", save_name=None):
     if save_name is None:
         save_name = create_hash(str(datetime.datetime.now()), random.randint(1, 1000000))
-    bytes_name = os.path.join(save_dir, save_name+".dat")
+    bytes_name = os.path.join(save_dir, save_name + ".dat")
     with open(bytes_name, "wb") as file_out:
         file_out.write(bytes)
 
@@ -360,6 +360,21 @@ def get_observations():
         observation.original_waterfall = None
     return Response(json.dumps(observations, cls=JSONEncoder), status=200, mimetype='application/json')
 
+
+@app.route('/observation', methods=['DELETE'])
+def delete_observation():
+    observation_id = request.args['observation_id']
+    session_code = request.headers.get('Authorization').split(" ")[1]
+    current_user = request.headers.get('Authorization').split(" ")[0]
+
+    current_user_account = account_actor.get_account_by_username(current_user)
+    session = session_actor.get_session(session_code, current_user_account.account_id)
+
+    if valid_session(session):
+        ObservationInteractor().delete_observation(observation_id=observation_id)
+        return Response(json.dumps({"status": Status.SUCCESS}), status=200, mimetype='application/json')
+    else:
+        return Response(json.dumps({"status": Status.AUTHENTICATION_FAILURE}), status=200, mimetype='application/json')
 
 
 @app.route("/images", methods=["GET"])
