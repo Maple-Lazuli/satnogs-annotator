@@ -44,7 +44,7 @@ CREATE TABLE sessions (
 
 CREATE TABLE observations (
 	observation_id serial PRIMARY KEY,
-	satnogs_id INT NOT NULL,
+	satnogs_id INT UNIQUE NOT NULL,
 	satellite_name VARCHAR ( 200 ) NOT NULL,
 	station_name VARCHAR ( 200 ) NOT NULL,
 	status VARCHAR ( 20 ) NOT NULL,
