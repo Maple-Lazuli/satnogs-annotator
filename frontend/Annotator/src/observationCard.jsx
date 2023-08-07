@@ -1,7 +1,5 @@
 import axios from 'axios';
-import {redirect, useNavigate} from "react-router-dom";
-export default function Observation(observation, username, session) {
-
+export default function Observation(observation, username, session, navigate) {
 
     const deleteObservation = async (a) => {
         let code = 0
@@ -34,8 +32,8 @@ export default function Observation(observation, username, session) {
             <h6 className="card-subtitle mb-2 text-body-secondary">{observation.satellite_name} ({observation.transmitter.split(" ")[0]})</h6>
             <p className="card-text">{`Human: ${'Yes'}`}<br/>{`Machine: ${'No'}`}</p> 
             <p class="card-text"><small class="text-body-secondary"><i>Pulled: {observation.pull_date.split(".")[0]}</i></small></p>
-            <a class="btn btn-primary" href={`http://localhost:5173/CreateAnnotation?observation_id=${observation.satnogs_id}`} role="button">Annotate</a> 
-            <button type="button" style={{'marginLeft':'5px'}} onClick={() => deleteObservation()}class="btn btn-danger">Delete</button>
+            <a class="btn btn-outline-primary" href={`http://localhost:5173/CreateAnnotation?observation_id=${observation.satnogs_id}`} role="button">View</a> 
+            <button type="button" style={{'marginLeft':'5px'}} onClick={() => deleteObservation()}class="btn btn-outline-danger">Delete</button>
         </div>
         </div>
     </div>

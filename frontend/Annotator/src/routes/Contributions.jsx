@@ -4,8 +4,7 @@ import Backend from '../api';
 import ObservationCard from "../observationCard"
 import {redirect, useNavigate} from "react-router-dom";
 
-
-export default function ShowAllObservations() {
+export default function ContributedAnnotations() {
     const [username, setUsername] = useState("");
     const [session, setSession] = useState("");
     getSession().then(s => setSession(s))
@@ -13,26 +12,29 @@ export default function ShowAllObservations() {
     const [observations, setObservations] = useState([]);
     const [tried, setTried] = useState(false);
     const navigate = useNavigate()
-    
 
+    
     const getItems = async () => {
         const response = await Backend.get(
-            '/observations', {}).then( (res) => {setObservations(res['data'])})}
+            `/userContributions?username=${username}`, {}).then( (res) => {setObservations(res['data'])})
+        }
 
-    if (observations.length == 0 && !tried){
+    if (observations.length == 0 && !tried && username != ""){
         getItems()
         setTried(true)
     }
 
     return (
         <div class="container">
-<div class="row flex-row">
+            <a class="btn btn-primary" href="/StartAnnotation" role="button">Start Annotation</a>
+            <hr />
+    <div class="row flex-row">
         {
         observations.length == 0 ?
-        (<i>No observations have been pulled yet.</i>):
+        (<i>You have not contributed yet.</i>):
         (observations.map(observation => ObservationCard(observation, username, session, navigate)))
         }
-</div>
+    </div>
         </div>
     );
-  }
+    }

@@ -28,7 +28,7 @@ export default function Root() {
   const logout = () => {
     setActive(false)
     setActiveSession(false)
-    navigate("/Allitems")
+    navigate("/")
   }
 
   return (
@@ -45,7 +45,7 @@ export default function Root() {
                     <a className="nav-link" aria-current="page" href="/allObservations">All Annotations</a>
                   </li>
                   <li className="nav-item">
-                    <a className={active? ('nav-link') : ('nav-link disabled')} href="/YourAnnotations">Your Annotations</a>
+                    <a className={active? ('nav-link') : ('nav-link disabled')} href="/Contributions">Your Contributions</a>
                   </li>
                 </ul>
                 { active?(<>

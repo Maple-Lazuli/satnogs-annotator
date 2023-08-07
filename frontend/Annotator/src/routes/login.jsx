@@ -27,7 +27,7 @@ export default function Login() {
             setUsername(username)
             setAccountID(res['data']['account_id'])
             setJustAuthenticated(true)
-            navigate("/YourAnnotations");
+            navigate("/Contributions");
         } else {
             alert("Authentication Failed")
         }

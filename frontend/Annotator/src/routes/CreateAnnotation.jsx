@@ -22,6 +22,7 @@ export default function CreateAnnotation() {
     const onFormSubmit = (event) => {
         event.preventDefault();        
         annotations.map(a => submitAnnotation(a))
+        navigate("/Contributions")
       };
 
 

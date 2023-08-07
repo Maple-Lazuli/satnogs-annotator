@@ -10,7 +10,7 @@ import Root from "./routes/root";
 import ErrorPage from "./error-page";
 import CreateAccount from "./routes/createAccount";
 import Login from "./routes/login"
-import OwnedAnnotations from "./routes/OwnedAnnotations"
+import ContributedAnnotations from "./routes/Contributions"
 import StartAnnotation from "./routes/StartAnnotation"
 import CreateAnnotation from "./routes/CreateAnnotation"
 import EditItem from "./routes/EditItem"
@@ -37,8 +37,8 @@ const router = createBrowserRouter([
         element: <ShowAllObservations />
         },
         {
-        path: "yourAnnotations",
-        element: <OwnedAnnotations />
+        path: "Contributions",
+        element: <ContributedAnnotations />
         },
         {
         path: "StartAnnotation",
