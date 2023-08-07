@@ -87,7 +87,7 @@ CREATE TABLE tasks (
 
 CREATE TABLE models (
 	model_id serial PRIMARY KEY,
-	model_name VARCHAR ( 50 ) NOT NULL,
+	model_name VARCHAR ( 50 ) UNIQUE NOT NULL,
 	created_on TIMESTAMP NOT NULL
 );
 
