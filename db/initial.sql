@@ -88,7 +88,8 @@ CREATE TABLE tasks (
 CREATE TABLE models (
 	model_id serial PRIMARY KEY,
 	model_name VARCHAR ( 50 ) UNIQUE NOT NULL,
-	created_on TIMESTAMP NOT NULL
+	creation_date TIMESTAMP NOT NULL,
+	description VARCHAR (300 ) NOT NULL
 );
 
 CREATE TABLE machine_annotations (
