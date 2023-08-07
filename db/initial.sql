@@ -85,4 +85,33 @@ CREATE TABLE tasks (
 	FOREIGN KEY (observation_id) REFERENCES observations (observation_id)
 );
 
+CREATE TABLE models (
+	model_id serial PRIMARY KEY,
+	model_name VARCHAR ( 50 ) NOT NULL,
+	created_on TIMESTAMP NOT NULL
+);
+
+CREATE TABLE machine_annotations (
+	annotation_id serial PRIMARY KEY,
+	model_id INT NOT NULL,
+	observation_id INT NOT NULL,
+	creation_date TIMESTAMP NOT NULL,
+	x_center FLOAT NOT NULL,
+	y_center FLOAT NOT NULL,
+	width FLOAT NOT NULL,
+	height FLOAT NOT NULL,
+	FOREIGN KEY (model_id) REFERENCES models (model_id),
+	FOREIGN KEY (observation_id) REFERENCES observations (observation_id)
+);
+
+CREATE TABLE machine_images (
+	image_id serial PRIMARY KEY,
+	model_id INT NOT NULL,
+	observation_id INT NOT NULL,
+	creation_date TIMESTAMP NOT NULL,
+	thresholded_waterfall BYTEA NOT NULL,
+	FOREIGN KEY (model_id) REFERENCES models (model_id),
+	FOREIGN KEY (observation_id) REFERENCES observations (observation_id)
+);
+
 
