@@ -358,6 +358,28 @@ def get_observations():
         observation.greyscale_waterfall = None
         observation.threshold_waterfall = None
         observation.original_waterfall = None
+        # TODO add number of human and machine annotations
+    return Response(json.dumps(observations, cls=JSONEncoder), status=200, mimetype='application/json')
+
+
+@app.route('/userContributions', methods=['GET'])
+def userContributions():
+    args = request.args
+    username = args['username']
+    account_id = AccountInteractor().get_account_by_username(username).account_id
+    user_annotations = AnnotationInteractor().get_annotations_by_account_id(account_id)
+    observation_ids = set()
+    for annotation in user_annotations:
+        observation_ids.add(annotation.observation_id)
+
+    observations = [ObservationInteractor().get_observation(id) for id in observation_ids]
+
+    for idx in range(len(observations)):
+        observation = observations[idx]
+        observation.greyscale_waterfall = None
+        observation.threshold_waterfall = None
+        observation.original_waterfall = None
+        # TODO add number of human and machine annotations
     return Response(json.dumps(observations, cls=JSONEncoder), status=200, mimetype='application/json')
 
 
