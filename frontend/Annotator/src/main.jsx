@@ -10,12 +10,12 @@ import Root from "./routes/root";
 import ErrorPage from "./error-page";
 import CreateAccount from "./routes/createAccount";
 import Login from "./routes/login"
-import ShowAllItems from "./routes/allItems"
 import OwnedAnnotations from "./routes/OwnedAnnotations"
 import StartAnnotation from "./routes/StartAnnotation"
 import CreateAnnotation from "./routes/CreateAnnotation"
 import EditItem from "./routes/EditItem"
 import Index from "./routes/Index"
+import ShowAllObservations from "./routes/allObservations";
 
 const router = createBrowserRouter([
   {
@@ -33,8 +33,8 @@ const router = createBrowserRouter([
         element: <CreateAccount />
       },
       {
-        path: "allItems",
-        element: <ShowAllItems />
+        path: "allObservations",
+        element: <ShowAllObservations />
         },
         {
         path: "yourAnnotations",
