@@ -42,7 +42,7 @@ export default function Root() {
               <div className="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                   <li className="nav-item">
-                    <a className="nav-link" aria-current="page" href="/allItems">All Annotations</a>
+                    <a className="nav-link" aria-current="page" href="/allObservations">All Annotations</a>
                   </li>
                   <li className="nav-item">
                     <a className={active? ('nav-link') : ('nav-link disabled')} href="/YourAnnotations">Your Annotations</a>
