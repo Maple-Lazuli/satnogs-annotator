@@ -7,7 +7,7 @@ from flask import Flask, request, Response, send_file
 from flask_cors import CORS
 import random
 import hashlib
-import tempfile
+
 import numpy as np
 from matplotlib import cm
 from PIL import Image
@@ -19,6 +19,10 @@ from permission_interactions import PermissionInteractor
 from role_interactions import RoleInteractor
 from session_interactions import SessionInteractor
 from task_interactions import TaskInteractor
+from machine_annotation_interactions import MachineAnnotationInteractor
+from machine_image_interactions import MachineImageInterator
+from model_interactions import ModelInteractor
+
 import satnogs_interactions as si
 import tarfile
 
@@ -466,6 +470,56 @@ def export():
     t_file.close()
 
     return send_file(os.path.join(temp_dir, "export.tar"), mimetype='application/x-tar')
+
+
+@app.route('/model', methods=['POST'])
+def register_model():
+    model_name = request.json['model_name']
+    model_description = request.json['description']
+
+    status = ModelInteractor().create_model(model_name=model_name, description=model_description)
+
+    return Response(json.dumps({'created': status}), status=200, mimetype='application/json')
+
+
+@app.route('/model', methods=['GET'])
+def get_model():
+    args = request.args
+    model_name = args['model_name']
+    model = ModelInteractor().get_model_by_name(model_name)
+
+    return Response(json.dumps(model, cls=JSONEncoder), status=200, mimetype='application/json')
+
+
+@app.route('/models', methods=['GET'])
+def get_models():
+    models = ModelInteractor().get_models()
+
+    return Response(json.dumps(models, cls=JSONEncoder), status=200, mimetype='application/json')
+
+
+@app.route('/machine_image', methods=['POST'])
+def add_machine_image():
+    file_contents = request.files['file'].stream.read()
+    args = request.args
+    model_name = args['model_name']
+    satnogs_id = args['satnogs_id']
+
+    model = ModelInteractor().get_model_by_name(model_name)
+    observation = ObservationInteractor().get_observation_by_satnogs_id(satnogs_id)
+
+    if model is not None and observation is not None:
+        MachineImageInterator().create_image(model.model_id, observation.observation_id, file_contents)
+        status = True
+    else:
+        status = False
+
+    return Response(json.dumps({'Uploaded': status}), status=200, mimetype='application/json')
+
+
+@app.route('/machine_image', methods=['GET'])
+def get_machine_images():
+    pass
 
 
 def main():
