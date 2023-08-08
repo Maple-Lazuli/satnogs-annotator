@@ -5,6 +5,7 @@ import {redirect, useNavigate} from "react-router-dom";
 import axios from 'axios';
 import Backend from '../api';
 import Annotator from "../annotate";
+import MachineObservationAnnotations from "./MachineObservationAnnotations";
 
 export default function CreateAnnotation() {
   const [status, setStatus] = useState(-1);
@@ -164,6 +165,7 @@ export default function CreateAnnotation() {
     
 
     return (
+      <div>
     <form onSubmit={onFormSubmit}>
       {Annotator(window.location.search.split("=")[1], selection, annotations, setAnnotations, clearType)}
       { status < 0 ? (
@@ -202,7 +204,10 @@ export default function CreateAnnotation() {
         onChange={() => setAnnotations(event.target.value)} style={{'padding': "4px"}}/>
         </div>
       <button type="submit" className="btn btn-primary" style={{'margin': "4px"}}>Submit Annotations</button>
-      <button type="button" className="btn btn-secondary" style={{'margin': "4px"}}onClick={() => clearAnnotations()}>Clear Annotations</button>
+      <button type="button" className="btn btn-secondary" style={{'margin': "4px"}} onClick={() => clearAnnotations()}>Clear Annotations</button>
     </form>
+        <hr />
+        {MachineObservationAnnotations(window.location.search.split("=")[1])}
+    </div>
     );
   }

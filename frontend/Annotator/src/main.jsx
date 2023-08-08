@@ -16,6 +16,8 @@ import CreateAnnotation from "./routes/CreateAnnotation"
 import EditItem from "./routes/EditItem"
 import Index from "./routes/Index"
 import ShowAllObservations from "./routes/allObservations";
+import Models from "./routes/Models"
+import Model from "./routes/Model"
 
 const router = createBrowserRouter([
   {
@@ -45,13 +47,21 @@ const router = createBrowserRouter([
         element: <StartAnnotation />
         },
         {
-          path: "CreateAnnotation",
-          element: <CreateAnnotation />
-          },
+        path: "CreateAnnotation",
+        element: <CreateAnnotation />
+        },
         {
         path: "EditItem",
         element: <EditItem />
         },
+        {
+        path: "Models",
+        element: <Models />
+        }, 
+        {
+        path: "Model",
+        element: <Model/>
+        },        
     ]
   },
 ]);

@@ -47,6 +47,9 @@ export default function Root() {
                   <li className="nav-item">
                     <a className={active? ('nav-link') : ('nav-link disabled')} href="/Contributions">Your Contributions</a>
                   </li>
+                  <li className="nav-item">
+                    <a className={active? ('nav-link') : ('nav-link disabled')} href="/Models">Models</a>
+                  </li>
                 </ul>
                 { active?(<>
                 <i>Logged in as: &nbsp;</i><b>{username}&nbsp;</b>

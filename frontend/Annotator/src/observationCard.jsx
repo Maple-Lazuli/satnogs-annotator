@@ -26,13 +26,13 @@ export default function Observation(observation, username, session, navigate) {
     return(
     <div class="col-3" key={observation.observation_id}>
         <div className="card">
-        <img class="card-img-top" src={`http://localhost:5001/images?satnogs_id=${observation.satnogs_id}&type=origional`} alt="Card image cap"/>
+        <img className="card-img-top" src={`http://localhost:5001/images?satnogs_id=${observation.satnogs_id}&type=origional`} alt="Card image cap"/>
         <div className="card-body">
             <h5 className="card-title">{observation.satnogs_id} </h5> 
             <h6 className="card-subtitle mb-2 text-body-secondary">{observation.satellite_name} ({observation.transmitter.split(" ")[0]})</h6>
             <p className="card-text">{`Human: ${'Yes'}`}<br/>{`Machine: ${'No'}`}</p> 
-            <p class="card-text"><small class="text-body-secondary"><i>Pulled: {observation.pull_date.split(".")[0]}</i></small></p>
-            <a class="btn btn-outline-primary" href={`http://localhost:5173/CreateAnnotation?observation_id=${observation.satnogs_id}`} role="button">View</a> 
+            <p className="card-text"><small className="text-body-secondary"><i>Pulled: {observation.pull_date.split(".")[0]}</i></small></p>
+            <a className="btn btn-outline-primary" href={`http://localhost:5173/CreateAnnotation?observation_id=${observation.satnogs_id}`} role="button">View</a> 
             <button type="button" style={{'marginLeft':'5px'}} onClick={() => deleteObservation()}class="btn btn-outline-danger">Delete</button>
         </div>
         </div>
