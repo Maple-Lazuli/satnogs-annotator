@@ -547,10 +547,24 @@ def get_machine_images():
         observation = ObservationInteractor().get_observation_by_satnogs_id(args['satnogs_id'])
         images = [im for im in images if im.observation_id == observation.observation_id]
 
-    for idx in range(len(images)):
-        images[idx].waterfall = None
+    dicts = []
 
-    return Response(json.dumps(images, cls=JSONEncoder), status=200, mimetype='application/json')
+    for idx in range(len(images)):
+        model = ModelInteractor().get_model_by_id(images[idx].model_id)
+        observation = ObservationInteractor().get_observation(images[idx].observation_id)
+        dicts.append({
+            'image_id': images[idx].image_id,
+            'model_id': images[idx].model_id,
+            'observation_id': images[idx].observation_id,
+            'creation_date': str(images[idx].creation_date),
+            'model_name': model.model_name,
+            'model_description': model.description,
+            'satellite':  observation.satellite_name,
+            'satnogs_id': observation.satnogs_id,
+            'transmitter': observation.transmitter.split(" ")[0]
+        })
+
+    return Response(json.dumps(dicts, cls=JSONEncoder), status=200, mimetype='application/json')
 
 
 def main():
