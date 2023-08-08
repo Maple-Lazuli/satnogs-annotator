@@ -117,6 +117,14 @@ def get_image_from_bytes(bytes, shape, save_dir, color_map="", save_name=None):
     return save_name
 
 
+def retrieve_image(bytes, save_dir):
+    save_name = create_hash(str(datetime.datetime.now()), random.randint(1, 1000000))
+    bytes_name = os.path.join(save_dir, save_name)
+    with open(bytes_name, "wb") as file_out:
+        file_out.write(bytes)
+    return bytes_name
+
+
 @app.route('/account', methods=['GET'])
 def get_account():
     args = request.args
@@ -518,8 +526,31 @@ def add_machine_image():
 
 
 @app.route('/machine_image', methods=['GET'])
+def get_machine_image():
+    temp_dir = "./temp"
+    verify_directory(temp_dir)
+    image_id = request.args.get('image_id')
+    image_name = retrieve_image(MachineImageInterator().get_image_by_id(image_id).waterfall, temp_dir)
+    return send_file(image_name, mimetype='image/png')
+
+
+@app.route('/machine_images', methods=['GET'])
 def get_machine_images():
-    pass
+    images = MachineImageInterator().get_images()
+    args = request.args
+
+    if 'model_name' in args.keys():
+        model = ModelInteractor().get_model_by_name(args['model_name'])
+        images = [im for im in images if im.model_id == model.model_id]
+
+    if 'satnogs_id' in args.keys():
+        observation = ObservationInteractor().get_observation_by_satnogs_id(args['satnogs_id'])
+        images = [im for im in images if im.observation_id == observation.observation_id]
+
+    for idx in range(len(images)):
+        images[idx].waterfall = None
+
+    return Response(json.dumps(images, cls=JSONEncoder), status=200, mimetype='application/json')
 
 
 def main():
